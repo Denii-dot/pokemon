@@ -2,21 +2,39 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pokemon catalog</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./css/style.css" />
 </head>
 
 <body>
     <main class="catalog">
         <header class="catalog__header">
-            <h1 class="catalog__heading">Pokemon Catalog</h1>
+            <h1 class="catalog__heading">
+                <span class="catalog__heading--primary">Pokemon</span> catalog
+            </h1>
+            <div class="search">
+                <input type="text" name="search" id="search" class="search__input" placeholder="Search"
+                    autocomplete="off" />
+                <label for="search" class="search__label">Search</label>
+            </div>
         </header>
+        <section class="catalog__content" data-content>
+            <p class="catalog__info hide" data-info>There are no results</p>
+        </section>
+        <footer class="catalog__footer">
+            <button class="catalog__button" data-button>Load more</button>
+            <div class="catalog__loader hide" data-loader></div>
+        </footer>
     </main>
+
     <script src="./js/index.js"></script>
+    <script>
+        const catalog = new PokemonCatalog();
+        catalog.initializeCatalog();
+    </script>
 </body>
 
 </html>
