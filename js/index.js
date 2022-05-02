@@ -137,6 +137,6 @@ class PokemonCatalog {
           image.src = image.getAttribute("data-image");
         }
       });
-    }, 1000);
+    }, 2000);
   }
 }
