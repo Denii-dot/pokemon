@@ -10,6 +10,7 @@ class PokemonCatalog {
     this.loader = null;
     this.search = null;
     this.info = null;
+    this.images = null;
 
     this.API = "https://api.pokemontcg.io";
     this.API_VERSION = "v2";
@@ -24,6 +25,7 @@ class PokemonCatalog {
       search: "search",
       card: "[data-card]",
       info: "[data-info]",
+      images: ".card__image",
     };
   }
 
@@ -33,14 +35,17 @@ class PokemonCatalog {
     this.loader = document.querySelector(this.UiSelectors.loader);
     this.search = document.getElementById(this.UiSelectors.search);
     this.info = document.querySelector(this.UiSelectors.info);
+
     this.addEventListeners();
 
     this.pullCards();
+    this.isImageLoaded();
   }
 
   addEventListeners() {
     this.button.addEventListener("click", () => this.pullCards());
     this.search.addEventListener("keyup", () => this.filterCards());
+    this.imag;
   }
 
   async pullCards() {
@@ -56,8 +61,6 @@ class PokemonCatalog {
 
     this.createCatalog(this.newCards);
     this.currentPage++;
-
-    // console.log(this.cards);
   }
 
   toggleShowElement(...elements) {
@@ -67,7 +70,7 @@ class PokemonCatalog {
   async fetchData(url) {
     const response = await fetch(url);
     const parsedResponse = await response.json();
-    console.log(parsedResponse.data);
+
     return parsedResponse.data;
   }
 
@@ -78,14 +81,16 @@ class PokemonCatalog {
   }
 
   createCard({ name, images, supertype, subtypes, rarity, id }) {
-    return `
+    const card = `
       <article class="card" id=${id} data-card>
         <header class="card"__header>
             <h2 class="card__heading">
             ${name}
             </h2>
         </header>
-        <img class="card__image" src="${images.small}" alt="${name}">
+        <img class="card__image" src="${images.small}" data-image="${
+      images.small
+    }"  alt="${name}">
         <p class="card__description"><span class="bold">Supertype</span>: ${supertype}</p>
         <p class="card__description ${
           subtypes ? "" : "hide"
@@ -95,6 +100,8 @@ class PokemonCatalog {
         }"><span class="bold">Rarity</span>: ${rarity}</p>
       </article>
       `;
+
+    return card;
   }
 
   filterCards() {
@@ -119,5 +126,17 @@ class PokemonCatalog {
     filteredCards.forEach(({ id }) =>
       document.getElementById(id).classList.add("hide")
     );
+  }
+  isImageLoaded() {
+    window.setInterval(() => {
+      this.images = document.querySelectorAll(this.UiSelectors.images);
+      this.images.forEach((image) => {
+        if (!image.complete) {
+          image.src = "../assets/PokemonReverse.jpg";
+        } else {
+          image.src = image.getAttribute("data-image");
+        }
+      });
+    }, 1000);
   }
 }
