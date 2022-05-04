@@ -11,13 +11,16 @@ class PokemonCatalog {
     this.search = null;
     this.info = null;
     this.images = null;
+    this.pokemonCards = null;
+
+    this.filterIsActive = null;
 
     this.API = "https://api.pokemontcg.io";
     this.API_VERSION = "v2";
     this.API_RESOURCE = "cards";
 
     this.API_ENDPOINT = `${this.API}/${this.API_VERSION}/${this.API_RESOURCE}`;
-    // this.API_ENDPOINT = `https://api.pokemontcg.io/v2/cards?q=name:charizard`;
+    // this.API_ENDPOINT = ;
 
     this.UiSelectors = {
       content: "[data-content]",
@@ -27,6 +30,7 @@ class PokemonCatalog {
       card: "[data-card]",
       info: "[data-info]",
       images: ".card__image",
+      searchButton: ".search__button",
     };
   }
 
@@ -36,6 +40,7 @@ class PokemonCatalog {
     this.loader = document.querySelector(this.UiSelectors.loader);
     this.search = document.getElementById(this.UiSelectors.search);
     this.info = document.querySelector(this.UiSelectors.info);
+    this.searchButton = document.querySelector(this.UiSelectors.searchButton);
 
     this.addEventListeners();
     this.pullCards();
@@ -43,25 +48,40 @@ class PokemonCatalog {
 
   addEventListeners() {
     this.button.addEventListener("click", () => this.pullCards());
-    this.search.addEventListener("keyup", () => this.filterCards());
+    console.log(this.searchButton);
+    this.searchButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      this.filterCards();
+    });
   }
 
-  async pullCards() {
+  async pullCards(
+    defaultParam = `${this.API_ENDPOINT}?page=${this.currentPage}&pageSize=${this.pageSize}`
+  ) {
+    this.checkFiltering();
+    let cards;
+    console.log(this.filterIsActive);
     this.toggleShowElement(this.loader, this.button);
-    const cards = await this.fetchData(
-      `${this.API_ENDPOINT}?page=${this.currentPage}&pageSize=${this.pageSize}`
-    );
+    if (this.filterIsActive) {
+      cards = await this.fetchData(
+        `${
+          this.API_ENDPOINT
+        }?q=name:${this.search.value.toLowerCase()}*&pageSize=${
+          this.pageSize
+        } &page=${this.currentPage}`
+      );
+    } else {
+      cards = await this.fetchData(defaultParam);
+    }
     this.toggleShowElement(this.loader, this.button);
 
     this.cards = [...this.cards, ...cards];
 
     this.newCards = [...cards];
-    console.log(this.currentPage);
-    console.log(this.pageSize);
-    console.log(this.newCards);
 
     this.createCatalog(this.newCards);
     this.currentPage++;
+    this.checkItsAllCards();
 
     this.isImageLoaded();
   }
@@ -85,9 +105,9 @@ class PokemonCatalog {
 
   createCard({ name, images, supertype, subtypes, rarity, id, types }) {
     const card = `
-      <article class="card ${types[0]
-        .toString()
-        .toLowerCase()}" id=${id} data-card 
+      <article class="card ${
+        types ? types[0].toString().toLowerCase() : ""
+      }" id=${id} data-card 
       ">
         <header class="card"__header>
             <h2 class="card__heading">
@@ -104,7 +124,9 @@ class PokemonCatalog {
         <p class="card__description ${
           rarity ? "" : "hide"
         }"><span class="bold">Rarity</span>: ${rarity}</p>
-        <span class="bold">Types: </span>${types}
+        <span class="bold ${types ? "" : "hide"}"">Types: </span>${
+      types ? types[0] : ""
+    }
       </article>
       `;
 
@@ -112,26 +134,13 @@ class PokemonCatalog {
   }
 
   filterCards() {
+    this.checkFiltering();
+    //hide button where search input is not empty
     const searchQuery = this.search.value.toLowerCase();
-
-    searchQuery.length
-      ? this.button.classList.add("hide")
-      : this.button.classList.remove("hide");
-
-    document
-      .querySelectorAll(this.UiSelectors.card)
-      .forEach((element) => element.classList.remove("hide"));
-
-    const filteredCards = this.cards.filter(
-      ({ name }) => !name.toLowerCase().includes(searchQuery)
-    );
-
-    filteredCards.length === this.cards.length
-      ? this.info.classList.remove("hide")
-      : this.info.classList.add("hide");
-
-    filteredCards.forEach(({ id }) =>
-      document.getElementById(id).classList.add("hide")
+    const cards = document.querySelectorAll(this.UiSelectors.card);
+    this.clearCatalogContentWithCards(cards);
+    this.pullCards(
+      `${this.API_ENDPOINT}?q=name:*${searchQuery}*&pageSize=${this.pageSize} `
     );
   }
   isImageLoaded() {
@@ -139,20 +148,40 @@ class PokemonCatalog {
     this.images = document.querySelectorAll(this.UiSelectors.images);
     //set loading only on 4 (pageSize) elements
     this.images = Array.from(this.images).slice(-this.pageSize);
-    console.log(this.images);
+
     this.images.forEach((image) => {
       let isLoaded = image.complete && image.naturalHeight !== 0;
+
       if (!isLoaded) {
         image.src = "../assets/PokemonReverse.jpg";
-        setInterval(() => {
+        setTimeout(() => {
           this.images.forEach((image) => {
-            let isLoaded = image.complete && image.naturalHeight !== 0;
-            if (isLoaded) {
-              image.src = image.getAttribute("data-image");
-            }
+            image.src = image.getAttribute("data-image");
           });
-        }, 2000);
+        }, 500);
       }
     });
+  }
+
+  checkFiltering() {
+    if (this.search.value.length !== 0) {
+      this.filterIsActive = true;
+    } else {
+      this.filterIsActive = false;
+    }
+  }
+
+  clearCatalogContentWithCards(elements) {
+    elements.forEach((element) => this.catalog.removeChild(element));
+  }
+
+  checkItsAllCards() {
+    if (
+      document.querySelectorAll(this.UiSelectors.card).length %
+        this.pageSize !==
+      0
+    )
+      this.button.classList.add("hide");
+    else this.button.classList.remove("hide");
   }
 }
