@@ -17,6 +17,7 @@ class PokemonCatalog {
     this.API_RESOURCE = "cards";
 
     this.API_ENDPOINT = `${this.API}/${this.API_VERSION}/${this.API_RESOURCE}`;
+    // this.API_ENDPOINT = `https://api.pokemontcg.io/v2/cards?q=name:charizard`;
 
     this.UiSelectors = {
       content: "[data-content]",
@@ -37,15 +38,12 @@ class PokemonCatalog {
     this.info = document.querySelector(this.UiSelectors.info);
 
     this.addEventListeners();
-
     this.pullCards();
-    this.isImageLoaded();
   }
 
   addEventListeners() {
     this.button.addEventListener("click", () => this.pullCards());
     this.search.addEventListener("keyup", () => this.filterCards());
-    this.imag;
   }
 
   async pullCards() {
@@ -58,9 +56,14 @@ class PokemonCatalog {
     this.cards = [...this.cards, ...cards];
 
     this.newCards = [...cards];
+    console.log(this.currentPage);
+    console.log(this.pageSize);
+    console.log(this.newCards);
 
     this.createCatalog(this.newCards);
     this.currentPage++;
+
+    this.isImageLoaded();
   }
 
   toggleShowElement(...elements) {
@@ -80,9 +83,12 @@ class PokemonCatalog {
     ]);
   }
 
-  createCard({ name, images, supertype, subtypes, rarity, id }) {
+  createCard({ name, images, supertype, subtypes, rarity, id, types }) {
     const card = `
-      <article class="card" id=${id} data-card>
+      <article class="card ${types[0]
+        .toString()
+        .toLowerCase()}" id=${id} data-card 
+      ">
         <header class="card"__header>
             <h2 class="card__heading">
             ${name}
@@ -98,6 +104,7 @@ class PokemonCatalog {
         <p class="card__description ${
           rarity ? "" : "hide"
         }"><span class="bold">Rarity</span>: ${rarity}</p>
+        <span class="bold">Types: </span>${types}
       </article>
       `;
 
@@ -128,15 +135,24 @@ class PokemonCatalog {
     );
   }
   isImageLoaded() {
-    window.setInterval(() => {
-      this.images = document.querySelectorAll(this.UiSelectors.images);
-      this.images.forEach((image) => {
-        if (!image.complete) {
-          image.src = "../assets/PokemonReverse.jpg";
-        } else {
-          image.src = image.getAttribute("data-image");
-        }
-      });
-    }, 2000);
+    //check if the photo is uploaded
+    this.images = document.querySelectorAll(this.UiSelectors.images);
+    //set loading only on 4 (pageSize) elements
+    this.images = Array.from(this.images).slice(-this.pageSize);
+    console.log(this.images);
+    this.images.forEach((image) => {
+      let isLoaded = image.complete && image.naturalHeight !== 0;
+      if (!isLoaded) {
+        image.src = "../assets/PokemonReverse.jpg";
+        setInterval(() => {
+          this.images.forEach((image) => {
+            let isLoaded = image.complete && image.naturalHeight !== 0;
+            if (isLoaded) {
+              image.src = image.getAttribute("data-image");
+            }
+          });
+        }, 2000);
+      }
+    });
   }
 }
