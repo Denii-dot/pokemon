@@ -35,10 +35,15 @@ body {
 }
 .catalog__heading {
   font-size: 42px;
+  color: var(--primary-color);
+}
+
+.heading__a {
+  text-decoration: none;
   color: var(--secondary-color);
 }
 .catalog__heading--primary {
-  color: var(--primary-color);
+  color: var(--secondary-color);
 }
 .catalog__content {
   display: grid;
@@ -82,11 +87,17 @@ body {
   display: flex;
   flex-direction: row;
   justify-content: space-around;
+  background-color: var(--primary-color);
+  box-shadow: 0 3px 15px rgba(100, 100, 100, 0.5);
+  padding: 10px 20px;
+  border-radius: 15px;
 }
 
 .form__div {
   display: flex;
   flex-direction: column;
+}
+.form__span {
 }
 
 .filter__toggle:hover,

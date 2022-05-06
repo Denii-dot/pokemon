@@ -4,6 +4,7 @@ class PokemonCatalog {
     this.pageSize = 4;
     this.currentPage = 1;
     this.newCards = [];
+    this.visibleCards = null;
 
     this.catalog = null;
     this.button = null;
@@ -70,11 +71,13 @@ class PokemonCatalog {
       event.preventDefault();
       this.filterCards();
     });
+    this.filterbutton.addEventListener("click", (e) => {
+      e.preventDefault();
+      this.filterCardsByFiltering();
+    });
   }
 
-  async pullCards(
-    defaultParam = `${this.API_ENDPOINT}?page=${this.currentPage}&pageSize=${this.pageSize}`
-  ) {
+  async pullCards() {
     this.checkFiltering();
     let cards;
     this.toggleShowElement(this.loader, this.button);
@@ -86,14 +89,22 @@ class PokemonCatalog {
           this.pageSize
         } &page=${this.currentPage}`
       );
+      document.querySelectorAll(".form__input").forEach((element) => {
+        element.checked = false;
+      });
+    } else if (!this.filterIsActive && !this.checkboxsIsActive()) {
+      cards = await this.fetchData(
+        `${this.API_ENDPOINT}?page=${this.currentPage}&pageSize=${this.pageSize}`
+      );
+      document.querySelectorAll(".form__input").forEach((element) => {
+        element.checked = false;
+      });
     } else {
-      cards = await this.fetchData(defaultParam);
+      cards = await this.fetchData(this.makeURlForCheckboxs());
     }
 
     this.toggleShowElement(this.loader, this.button);
-
     this.cards = [...this.cards, ...cards];
-
     this.newCards = [...cards];
 
     this.createCatalog(this.newCards);
@@ -101,6 +112,38 @@ class PokemonCatalog {
     this.checkItsAllCards();
 
     this.isImageLoaded();
+  }
+
+  makeURlForCheckboxs() {
+    let URL = this.API_ENDPOINT + `?q=`;
+
+    let checkboxs = document.querySelectorAll(".form__input");
+    console.log(checkboxs);
+    checkboxs.forEach((checkbox) => {
+      if (checkbox.checked) {
+        if (checkbox.getAttribute("data-type") == "types") {
+          URL += `types:${checkbox.value}&`;
+        } else if (checkbox.getAttribute("data-type") == "subtypes") {
+          URL += `subtypes:${checkbox.value}&`;
+        } else if (checkbox.getAttribute("data-type") == "supertypes") {
+          URL += `supertype:${checkbox.value}&`;
+        } else if (checkbox.getAttribute("data-type") == "rarities") {
+          URL += `rarity:${checkbox.value}&`;
+        }
+      }
+    });
+    URL += `pageSize=${this.pageSize}&page=${this.currentPage}`;
+    console.log(URL);
+    return URL;
+  }
+
+  checkboxsIsActive() {
+    let items = document.querySelectorAll(".form__input");
+    let flag = false;
+    items.forEach((item) => {
+      if (item.checked) flag = true;
+    });
+    return flag;
   }
 
   toggleShowElement(...elements) {
@@ -154,8 +197,8 @@ class PokemonCatalog {
     this.checkFiltering();
     //hide button where search input is not empty
     const searchQuery = this.search.value.toLowerCase();
-    const cards = document.querySelectorAll(this.UiSelectors.card);
-    this.clearCatalogContentWithCards(cards);
+    this.visibleCards = document.querySelectorAll(this.UiSelectors.card);
+    this.clearCatalogContentWithCards(this.visibleCards);
     this.pullCards(
       `${this.API_ENDPOINT}?q=name:*${searchQuery}*&pageSize=${this.pageSize} `
     );
@@ -207,19 +250,20 @@ class PokemonCatalog {
       `${this.API}/${this.API_VERSION}/${type}`
     );
     filterElements = filterElements.slice(0, 5);
+    console.log(filterElements);
     this.createFormDiv(filterElements, type);
   }
 
   createFormDiv(filterElements, type) {
     let checboxs = filterElements
       .map((filterElement) => {
-        return `<label><input type="checkbox" class="form__input" value="${filterElement
+        return `<label><input type="checkbox" class="form__input" data-type="${type}" value="${filterElement
           .toLowerCase()
           .replace(/ /g, "")}">${filterElement}</label>`;
       })
       .join("");
     let formDiv = `<div class="form__div">
-      <span>${type}</span>
+      <span class="form__span">${type}</span>
       ${checboxs}
       <div>`;
     this.filter.insertAdjacentHTML("beforeend", formDiv);
@@ -228,5 +272,14 @@ class PokemonCatalog {
   switchVisibility() {
     this.filter.classList.toggle("hide");
     this.filterbutton.classList.toggle("hide");
+  }
+
+  filterCardsByFiltering() {
+    this.currentPage = 1;
+    if (document.querySelectorAll(".form__input")) {
+      this.visibleCards = document.querySelectorAll(this.UiSelectors.card);
+      this.clearCatalogContentWithCards(this.visibleCards);
+      this.pullCards();
+    }
   }
 }
