@@ -11,7 +11,10 @@ class PokemonCatalog {
     this.search = null;
     this.info = null;
     this.images = null;
-    this.pokemonCards = null;
+    this.searchButton = null;
+    this.filter = null;
+    this.filterButton = null;
+    this.switchVisibilityButton = null;
 
     this.filterIsActive = null;
 
@@ -31,6 +34,9 @@ class PokemonCatalog {
       info: "[data-info]",
       images: ".card__image",
       searchButton: ".search__button",
+      switchVisibilityButton: ".filter__toggle",
+      filterButton: ".filter__button",
+      filter: "[data-filter]",
     };
   }
 
@@ -41,14 +47,25 @@ class PokemonCatalog {
     this.search = document.getElementById(this.UiSelectors.search);
     this.info = document.querySelector(this.UiSelectors.info);
     this.searchButton = document.querySelector(this.UiSelectors.searchButton);
+    this.filter = document.querySelector(this.UiSelectors.filter);
+    this.filterbutton = document.querySelector(this.UiSelectors.filterButton);
+    this.switchVisibilityButton = document.querySelector(
+      this.UiSelectors.switchVisibilityButton
+    );
 
     this.addEventListeners();
     this.pullCards();
+    this.createForm("types");
+    this.createForm("subtypes");
+    this.createForm("supertypes");
+    this.createForm("rarities");
   }
 
   addEventListeners() {
     this.button.addEventListener("click", () => this.pullCards());
-    console.log(this.searchButton);
+    this.switchVisibilityButton.addEventListener("click", () => {
+      this.switchVisibility();
+    });
     this.searchButton.addEventListener("click", (event) => {
       event.preventDefault();
       this.filterCards();
@@ -60,7 +77,6 @@ class PokemonCatalog {
   ) {
     this.checkFiltering();
     let cards;
-    console.log(this.filterIsActive);
     this.toggleShowElement(this.loader, this.button);
     if (this.filterIsActive) {
       cards = await this.fetchData(
@@ -73,6 +89,7 @@ class PokemonCatalog {
     } else {
       cards = await this.fetchData(defaultParam);
     }
+
     this.toggleShowElement(this.loader, this.button);
 
     this.cards = [...this.cards, ...cards];
@@ -117,14 +134,14 @@ class PokemonCatalog {
         <img class="card__image" src="${images.small}" data-image="${
       images.small
     }"  alt="${name}">
-        <p class="card__description"><span class="bold">Supertype</span>: ${supertype}</p>
+        <p class="card__description"><span class="bold">Supertype</span>: ${supertype} </p>
         <p class="card__description ${
           subtypes ? "" : "hide"
-        }"><span class="bold">Subtype</span>: ${subtypes}</p>
+        }"><span class="bold">Subtype</span>: ${subtypes} </p>
         <p class="card__description ${
           rarity ? "" : "hide"
-        }"><span class="bold">Rarity</span>: ${rarity}</p>
-        <span class="bold ${types ? "" : "hide"}"">Types: </span>${
+        }"><span class="bold">Rarity</span>: ${rarity} </p>
+        <span class="bold ${types ? "" : "hide"}"">Type: </span>${
       types ? types[0] : ""
     }
       </article>
@@ -183,5 +200,33 @@ class PokemonCatalog {
     )
       this.button.classList.add("hide");
     else this.button.classList.remove("hide");
+  }
+
+  async createForm(type) {
+    let filterElements = await this.fetchData(
+      `${this.API}/${this.API_VERSION}/${type}`
+    );
+    filterElements = filterElements.slice(0, 5);
+    this.createFormDiv(filterElements, type);
+  }
+
+  createFormDiv(filterElements, type) {
+    let checboxs = filterElements
+      .map((filterElement) => {
+        return `<label><input type="checkbox" class="form__input" value="${filterElement
+          .toLowerCase()
+          .replace(/ /g, "")}">${filterElement}</label>`;
+      })
+      .join("");
+    let formDiv = `<div class="form__div">
+      <span>${type}</span>
+      ${checboxs}
+      <div>`;
+    this.filter.insertAdjacentHTML("beforeend", formDiv);
+  }
+
+  switchVisibility() {
+    this.filter.classList.toggle("hide");
+    this.filterbutton.classList.toggle("hide");
   }
 }
