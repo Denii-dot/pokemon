@@ -117,7 +117,6 @@ class PokemonCatalog {
     let URL = this.API_ENDPOINT + `?q=`;
 
     let checkboxs = document.querySelectorAll(".form__input");
-    console.log(checkboxs);
     checkboxs.forEach((checkbox) => {
       if (checkbox.checked) {
         if (checkbox.getAttribute("data-type") == "types") {
@@ -132,7 +131,6 @@ class PokemonCatalog {
       }
     });
     URL += `pageSize=${this.pageSize}&page=${this.currentPage}`;
-    console.log(URL);
     return URL;
   }
 
@@ -249,7 +247,7 @@ class PokemonCatalog {
       `${this.API}/${this.API_VERSION}/${type}`
     );
     filterElements = filterElements.slice(0, 5);
-    console.log(filterElements);
+
     this.createFormDiv(filterElements, type);
   }
 
