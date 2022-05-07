@@ -64,7 +64,6 @@ body {
   border: 4px solid var(--primary-color);
   padding: 20px 50px;
   border-radius: 10px;
-
   font-size: 24px;
 }
 .filter__div {
@@ -75,6 +74,7 @@ body {
 }
 .filter__toggle,
 .filter__button {
+  display: block;
   color: #fff;
   font-size: 32px;
   background-color: var(--primary-color);
@@ -82,9 +82,20 @@ body {
   padding: 10px 30px;
   border-radius: 10px;
 }
-
+.filter__button {
+  display: none;
+}
+.filter__arrow {
+  width: 100px;
+  margin: auto auto;
+  transform: rotate(270deg);
+  transition: 1s ease-in-out;
+}
+.filter__arrow.active {
+  transform: rotate(90deg);
+}
 .filter__form {
-  display: flex;
+  display: none;
   flex-direction: row;
   justify-content: space-around;
   background-color: var(--primary-color);
@@ -92,12 +103,45 @@ body {
   padding: 10px 20px;
   border-radius: 15px;
 }
+.filter__form.active,
+.filter__button.active {
+  display: flex;
+}
 
 .form__div {
   display: flex;
   flex-direction: column;
+
+  padding: 8px 10px;
+  border: 1px solid black;
+  border-radius: 10px;
 }
 .form__span {
+  background-color: var(--primary-color--light);
+  box-shadow: 0 3px 15px rgba(100, 100, 100, 0.5);
+  border-radius: 10px;
+  padding: 2px 40px;
+  margin: 0 auto 5px;
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 3px;
+}
+
+.form__input {
+  appearance: none;
+  background-color: #d5d5d5;
+  width: 10px;
+  height: 10px;
+  margin-right: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.form__input:checked {
+  background-color: rgb(55, 53, 53);
+}
+.form__label {
+  color: #282828;
+  cursor: pointer;
 }
 
 .filter__toggle:hover,

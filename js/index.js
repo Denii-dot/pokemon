@@ -24,7 +24,6 @@ class PokemonCatalog {
     this.API_RESOURCE = "cards";
 
     this.API_ENDPOINT = `${this.API}/${this.API_VERSION}/${this.API_RESOURCE}`;
-    // this.API_ENDPOINT = ;
 
     this.UiSelectors = {
       content: "[data-content]",
@@ -257,7 +256,7 @@ class PokemonCatalog {
   createFormDiv(filterElements, type) {
     let checboxs = filterElements
       .map((filterElement) => {
-        return `<label><input type="checkbox" class="form__input" data-type="${type}" value="${filterElement
+        return `<label class="form__label"><input type="checkbox" class="form__input" data-type="${type}" value="${filterElement
           .toLowerCase()
           .replace(/ /g, "")}">${filterElement}</label>`;
       })
@@ -270,8 +269,9 @@ class PokemonCatalog {
   }
 
   switchVisibility() {
-    this.filter.classList.toggle("hide");
-    this.filterbutton.classList.toggle("hide");
+    this.filter.classList.toggle("active");
+    document.querySelector(".filter__arrow").classList.toggle("active");
+    this.filterbutton.classList.toggle("active");
   }
 
   filterCardsByFiltering() {
