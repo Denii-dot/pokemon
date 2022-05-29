@@ -181,9 +181,11 @@ class PokemonCatalog {
         <p class="card__description ${
           rarity ? "" : "hide"
         }"><span class="bold">Rarity</span>: ${rarity} </p>
+        <p class="card__description">
         <span class="bold ${types ? "" : "hide"}"">Type: </span>${
       types ? types.join(" ,") : ""
     }
+        </p>
       </article>
       `;
     return card;
